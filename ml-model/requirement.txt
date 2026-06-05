@@ -1,0 +1,16 @@
+# Web Framework and Server
+fastapi==0.110.0
+uvicorn==0.27.1
+python-multipart==0.0.9
+
+# Deep Learning
+tensorflow==2.15.0
+numpy==1.26.4
+
+# Image Handling
+Pillow==10.2.0
+
+# Optional: For Data Analysis/Reports
+scikit-learn
+matplotlib
+seaborn

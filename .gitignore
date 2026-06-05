@@ -1,0 +1,61 @@
+# =============================================================================
+# FRONTEND CONFIG
+# =============================================================================
+# Dependencies
+frontend/node_modules/
+
+# Environment Files
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Build Files
+frontend/dist/
+frontend/build/
+
+# Logs
+frontend/*.log
+
+# =============================================================================
+# BACKEND CONFIG
+# =============================================================================
+# Dependencies
+cattle-backend/node_modules/
+
+# Environment Files
+cattle-backend/.env
+cattle-backend/.env.local
+cattle-backend/.env.production
+
+# User Uploaded Images
+cattle-backend/uploads/
+
+# Logs & Coverage
+cattle-backend/*.log
+cattle-backend/coverage/
+
+# =============================================================================
+# ML MODEL CONFIG
+# =============================================================================
+# Python Cache
+ml-model/__pycache__/
+*.pyc
+
+# Virtual Environment
+ml-model/venv/
+ml-model/.venv/
+
+# Large Model weights (Highly Recommended if file > 100MB)
+# ml-model/cattle_model.h5
+
+# Jupyter Notebook Cache
+.ipynb_checkpoints/
+
+# =============================================================================
+# GENERAL / IDE CONFIG
+# =============================================================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
