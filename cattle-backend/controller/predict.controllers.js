@@ -17,7 +17,7 @@ export const predictImage = async (req, res) => {
 
     // Send to Python FastAPI Model
     const response = await axios.post(
-      "http://127.0.0.1:8000/api/predict",
+      `${process.env.ML_API_URL}/api/predict`,
       formData,
       {
         headers: formData.getHeaders(),

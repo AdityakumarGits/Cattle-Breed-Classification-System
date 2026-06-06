@@ -6,15 +6,13 @@ import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 
 
-
-
-
-
 const ForgotPassword = () => {
+ const location = useLocation();
+  const navigate = useNavigate();
 const [email, setEmail] = useState ( location.state?.email || "");
-const location = useLocation();
+
 const [loading, setLoading] = useState(false);
-const navigate=useNavigate();
+
 
 
 const handleSendOTP = async (e) => {

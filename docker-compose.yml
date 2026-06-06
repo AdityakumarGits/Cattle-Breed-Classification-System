@@ -1,0 +1,23 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend
+
+  backend:
+    build: ./cattle-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./cattle-backend/.env
+    depends_on:
+      - ml
+
+  ml:
+    build: ./ml-model
+    ports:
+      - "5000:5000"
