@@ -5,7 +5,7 @@ const API = axios.create({
   withCredentials: true,
 });
 
-export default API;
+
 // Har request se pehle token add karega
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token"); // Check karein aapka key name 'token' hi hai na
