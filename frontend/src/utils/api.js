@@ -1,9 +1,13 @@
  import axios from "axios";
 
- const API = axios.create({
-  baseURL: "http://localhost:3000/api",
-  withCredentials: true, // 🔐 auth ke liye must
+ import axios from "axios";
+
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
 });
+
+export default API;
 // Har request se pehle token add karega
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token"); // Check karein aapka key name 'token' hi hai na
