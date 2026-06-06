@@ -10,10 +10,7 @@ export const predictImage = async (req, res) => {
       return res.status(400).json({ message: "No image uploaded" });
     }
     
-    console.log("File received:", file.filename);
-    console.log("ML_API_URL:", process.env.ML_API_URL);
-console.log("File path:", file.path);
-console.log("File exists:", fs.existsSync(file.path));
+  
     
     const formData = new FormData();
     formData.append("file", fs.createReadStream(file.path));
@@ -26,26 +23,18 @@ console.log("File exists:", fs.existsSync(file.path));
         headers: formData.getHeaders(),
       }
     );
+    console.log("ML Response:", response.data);
     // Send AI results back to React
     return res.status(200).json(response.data);
-  }catch (error) {
-  console.error("FULL ERROR:", error);
-  console.error("Node Error:", error.message);
-  console.error("FastAPI Error:", error?.response?.data);
+  }
+   catch (error) {
+    console.error("Node Error:", error.message);
+    console.error("FastAPI Error:", error?.response?.data);
 
-  return res.status(500).json({
-    message: "Server Error",
-    details: error?.response?.data || error.message
-  });
-
-  // } catch (error) {
-  //   console.error("Node Error:", error.message);
-  //   console.error("FastAPI Error:", error?.response?.data);
-
-  //   return res.status(500).json({ 
-  //       message: "Server Error: Failed to analyze breed",
-  //       details: error?.response?.data || error.message
-  //   });
+    return res.status(500).json({ 
+        message: "Server Error: Failed to analyze breed",
+        details: error?.response?.data || error.message
+    });
 
   } finally {
     // CRITICAL FIX: This runs no matter what. 
