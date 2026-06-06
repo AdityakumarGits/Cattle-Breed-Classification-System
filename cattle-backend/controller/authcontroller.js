@@ -1,7 +1,7 @@
 import User from "../model/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import transporter from "../config/mail.js";
+import resend from "../config/mail.js";
 import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -46,17 +46,18 @@ if (!strongPassword.test(password)) {
     });
 
     // Verification OTP Send karo
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Verify Your Email",
-      html: `
-        <h2>Welcome to Cattle Classifier</h2>
-        <p>Your OTP is:</p>
-        <h1>${otp}</h1>
-        <p>This OTP will expire in 5 minutes.</p>
-      `,
-    });
+    await resend.emails.send({
+  from: "onboarding@resend.dev",
+  to: email,
+  subject: "Verify Your Email",
+  html: `
+    <h2>Welcome to Cattle Classifier</h2>
+    <p>Your OTP is:</p>
+    <h1>${otp}</h1>
+    <p>This OTP will expire in 5 minutes.</p>
+  `,
+});
+console.log("RESEND RESPONSE:", response);
 
     res.status(201).json({
       success: true,
@@ -261,18 +262,18 @@ export const forgotPassword = async (req, res) => {
       Date.now() + 5 * 60 * 1000;
 
     await user.save();
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Reset Password OTP",
-      html: `
-        <h2>Password Reset</h2>
-        <p>Your OTP is:</p>
-        <h1>${otp}</h1>
-        <p>Valid for 5 minutes</p>
-      `,
-    });
+await resend.emails.send({
+  from: "onboarding@resend.dev",
+  to: email,
+  subject: "Reset Password OTP",
+  html: `
+    <h2>Password Reset</h2>
+    <p>Your OTP is:</p>
+    <h1>${otp}</h1>
+    <p>Valid for 5 minutes</p>
+  `,
+});
+console.log("RESEND RESPONSE:", response);
 
     return res.json({
       success: true,
