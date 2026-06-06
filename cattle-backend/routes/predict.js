@@ -1,13 +1,19 @@
 import { predictImage } from "../controller/predict.controllers.js";
+import fs from "fs";
+import express from "express";
+import multer from "multer";
 
-import express from "express"
-import multer from "multer"
+const router = express.Router();
 
-const router=express.Router();
-// Storage config
+const uploadDir = "uploads";
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -16,7 +22,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Route
 router.post("/", upload.single("file"), predictImage);
 
 export default router;
