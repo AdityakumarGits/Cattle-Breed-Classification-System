@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react"; // useEffect add kiya cleanup ke liye
 import { Upload, TrendingUp } from "lucide-react";
-import axios from "axios";
+import API from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -51,13 +51,13 @@ const Analyze = () => {
       setLoading(true);
       setResult(null);
 
-      const res = await axios.post(
-        "http://localhost:3000/api/predict",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+    const res = await API.post(
+  "/predict",
+  formData,
+  {
+    headers: { "Content-Type": "multipart/form-data" },
+  }
+);
      
       setResult(res.data);
     } catch (error) {
