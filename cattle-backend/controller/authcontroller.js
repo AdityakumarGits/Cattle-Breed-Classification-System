@@ -57,6 +57,7 @@ if (!strongPassword.test(password)) {
     <p>This OTP will expire in 5 minutes.</p>
   `,
 });
+console.log(JSON.stringify(response, null, 2));
 
 
     res.status(201).json({
