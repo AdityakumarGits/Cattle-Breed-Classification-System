@@ -57,7 +57,7 @@ if (!strongPassword.test(password)) {
     <p>This OTP will expire in 5 minutes.</p>
   `,
 });
-console.log("RESEND RESPONSE:", response);
+
 
     res.status(201).json({
       success: true,
@@ -273,7 +273,7 @@ await resend.emails.send({
     <p>Valid for 5 minutes</p>
   `,
 });
-console.log("RESEND RESPONSE:", response);
+
 
     return res.json({
       success: true,
