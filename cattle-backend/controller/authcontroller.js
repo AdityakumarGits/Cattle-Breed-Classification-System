@@ -46,7 +46,7 @@ if (!strongPassword.test(password)) {
     });
 
     // Verification OTP Send karo
-    await resend.emails.send({
+   const response = await resend.emails.send({
   from: "onboarding@resend.dev",
   to: email,
   subject: "Verify Your Email",
