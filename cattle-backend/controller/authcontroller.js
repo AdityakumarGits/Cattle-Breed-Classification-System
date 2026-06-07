@@ -57,7 +57,7 @@ if (!strongPassword.test(password)) {
     <p>This OTP will expire in 5 minutes.</p>
   `,
 });
-console.log(JSON.stringify(response, null, 2));
+console.log("Resend API Response:", JSON.stringify(response, null, 2));
 
 
     res.status(201).json({
@@ -146,14 +146,15 @@ export const login = async (req, res) => {
     });
 
     // Production security check for cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", 
-      sameSite: "lax",
-      path: "/",
-      maxAge: 1 * 24 * 60 * 60 * 1000, // 1 din
-    });
+    const isProduction = process.env.NODE_ENV === "production";
 
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: isProduction ? true : false, 
+  sameSite: isProduction ? "none" : "lax", // Localhost ke liye lax, cloud ke liye none
+  path: "/",
+  maxAge: 1 * 24 * 60 * 60 * 1000,
+});
     res.json({
       success: true,
       message: "Login successful",
@@ -211,13 +212,15 @@ export const googleLogin = async (req, res) => {
       expiresIn: "1d",
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 1 * 24 * 60 * 60 * 1000,
-    });
+   const isProduction = process.env.NODE_ENV === "production";
+
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: isProduction ? true : false, 
+  sameSite: isProduction ? "none" : "lax", // Localhost ke liye lax, cloud ke liye none
+  path: "/",
+  maxAge: 1 * 24 * 60 * 60 * 1000,
+});
 
     res.json({
       success: true,
@@ -366,10 +369,13 @@ export const resetPassword = async (req, res) => {
 // =============================================================================
 export const logout = (req, res) => {
   try {
+    const isProduction = process.env.NODE_ENV === "production";
+
+    // res.clearCookie direct cookie ko browser se delete kar deta hai
     res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProduction, // production me true, local me false
+      sameSite: isProduction ? "none" : "lax",
       path: "/",
     });
 
@@ -378,6 +384,7 @@ export const logout = (req, res) => {
       message: "Logout successful",
     });
   } catch (error) {
+    console.log("Logout Error:", error);
     res.status(500).json({ error: "Logout failed" });
   }
 };
