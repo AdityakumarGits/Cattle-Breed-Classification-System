@@ -24,7 +24,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
          
        //Call Gemini Api 
-          console.log("My Key is:", process.env.GEMINI_API_KEY);
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
       const prompt = `Give short detailed information about ${breed} cattle breed including origin, characteristics, milk production, and uses.`;
