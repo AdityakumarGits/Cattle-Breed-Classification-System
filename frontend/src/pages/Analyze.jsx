@@ -52,7 +52,7 @@ const Analyze = () => {
       setResult(null);
 
     const res = await API.post(
-  "/predict",
+  "/api/predict",
   formData,
   {
     headers: { "Content-Type": "multipart/form-data" },
