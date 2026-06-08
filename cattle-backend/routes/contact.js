@@ -1,73 +1,50 @@
 import express from "express";
 import Contact from "../model/contact.model.js";
-import { Resend } from "resend";
-import dotenv from "dotenv";
-
-dotenv.config();
+import nodemailer from "nodemailer";
 
 const router = express.Router();
-// Render environment variables se API Key uthayega
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+// 🔒 Secure Transporter Configuration (Port 465)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,            
+  secure: true,         
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS, 
+  },
+  tls: {
+    rejectUnauthorized: false 
+  }
+});
 
 router.post("/", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    // 1. Database mein message save karo
-    const contact = await Contact.create({
-      name,
-      email,
-      message,
-    });
+    const contact = await Contact.create({ name, email, message });
 
-    // 2. User ko confirmation mail bhejo
-    await resend.emails.send({
-      // 🚀 MAGIC HERE: Display name "Cattle Classifier" set kiya
-      from: "Cattle Classifier <onboarding@resend.dev>", 
-      to: email, // User ka email id
+    // 1. User Confirmation Mail
+    await transporter.sendMail({
+      from: `"Cattle Classifier" <${process.env.EMAIL_USER}>`,
+      to: email,
       subject: "Complaint Received - Cattle Classifier",
-      html: `
-        <div style="font-family: sans-serif; color: #333;">
-          <h2>Hello ${name},</h2>
-          <p>Thank you for reaching out to us. We have successfully received your complaint/query.</p>
-          <p>Our team is reviewing your message and will respond to you shortly.</p>
-          <br />
-          <div style="background-color: #f0fdf4; padding: 15px; border-left: 4px solid #16a34a; border-radius: 4px;">
-            <strong>Your Message:</strong>
-            <p style="font-style: italic; margin-top: 5px;">"${message}"</p>
-          </div>
-          <br />
-          <p>Best Regards,<br /><strong>Team Cattle Classifier</strong></p>
-        </div>
-      `,
+      html: `<h2>Hello ${name}</h2><p>We have received your query.</p><p>Message: ${message}</p>`,
     });
 
-    // 3. Admin (Aapko) notification mail bhejo
-    await resend.emails.send({
-      from: "Cattle Classifier System <onboarding@resend.dev>",
-      to: process.env.EMAIL_USER, // ⚠️ Render par aapka real gmail (cattlebreedhelp@gmail.com) hona chahiye
-      subject: `🚨 New Contact Form Submission from ${name}`,
-      html: `
-        <div style="font-family: sans-serif; color: #333;">
-          <h3>New Inquiry Details:</h3>
-          <p><b>Name:</b> ${name}</p>
-          <p><b>Email:</b> ${email}</p>
-          <p><b>Message:</b></p>
-          <p style="background: #f5f5f5; padding: 10px; border-radius: 4px;">${message}</p>
-        </div>
-      `,
+    // 2. Admin Notification Mail
+    await transporter.sendMail({
+      from: `"Cattle Classifier System" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_USER, // Aapki mail par notification aayegi
+      subject: "New Contact Form Submission",
+      html: `<h3>New Message</h3><p><b>Name:</b> ${name}</p><p><b>Message:</b> ${message}</p>`,
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Complaint submitted successfully",
-    });
+    res.status(201).json({ success: true, message: "Complaint submitted successfully" });
   } catch (error) {
-    console.error("Resend API/DB Error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server Error. Failed to send message.",
-    });
+    console.log(error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 });
 
