@@ -1,33 +1,34 @@
 import dotenv from "dotenv";
-import * as sibSdk from "@getbrevo/brevo";
+// 🚀 FIX: Ab classes ko direct destructured format mein import karenge, sibSdk ki zaroorat nahi hai
+import { TransactionalEmailsApi, SendSmtpEmail } from "@getbrevo/brevo";
 
 dotenv.config();
 
-// 🚀 FIX: Naye Brevo version mein direct client class instantiate hoti hai, bina instance properties ke
-const apiInstance = new sibSdk.TransactionalEmailsApi();
+// 🚀 Naye constructor ka direct object instantiate kiya
+const apiInstance = new TransactionalEmailsApi();
 
-// Render par set ki hui API KEY ko authorize kar rahe hain
-apiInstance.setApiKey(sibSdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+// Render variables se uthayi hui API key ko as a string direct set kiya
+apiInstance.setApiKey(0, process.env.BREVO_API_KEY); // 0 means API KEY indexing standard format
 
-// Custom adapter wrapper taaki baki controllers ka code bilkul na badalna pade
+// Custom resend wrapper code taaki aapke signup/contact files ko touch na karna pade
 const resendWannabe = {
   emails: {
     send: async ({ from, to, subject, html }) => {
-      const sendSmtpEmail = new sibSdk.SendSmtpEmail();
+      const sendSmtpEmail = new SendSmtpEmail();
 
       sendSmtpEmail.subject = subject;
       sendSmtpEmail.htmlContent = html;
       
-      // Sender dynamic set kiya (bina domain ke aapka gmail chalega)
+      // Dynamic Sender configuration (Bina custom domain ke chalega)
       sendSmtpEmail.sender = { 
         name: "Cattle Classifier", 
         email: process.env.EMAIL_USER || "cattlebreedhelp@gmail.com" 
       };
       
-      // Receiver set kiya
+      // Recipient mapping array
       sendSmtpEmail.to = [{ email: to }];
 
-      // Brevo API call execute kari (HTTPS Call - Render par block nahi hoga)
+      // Pure HTTPS API Call (Render isko block nahi kar payega!)
       return await apiInstance.sendTransacEmail(sendSmtpEmail);
     }
   }
