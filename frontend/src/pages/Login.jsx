@@ -18,7 +18,7 @@ const Login = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await API.post("/auth/login", {
+      const res = await API.post("/api/auth/login", {
         email,
         password,
       });
@@ -97,7 +97,7 @@ const Login = () => {
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
               try {
-                const res = await API.post("/auth/google-login", {
+                const res = await API.post("/api/auth/google-login", {
                   credential: credentialResponse.credential,
                 });
 

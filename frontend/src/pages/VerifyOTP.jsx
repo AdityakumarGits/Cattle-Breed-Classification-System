@@ -19,7 +19,7 @@ const VerifyOTP = () => {
       setLoading(true);
 
       const res = await API.post(
-  "/auth/verify-otp",
+  "/api/auth/verify-otp",
   {
     email,
     otp,

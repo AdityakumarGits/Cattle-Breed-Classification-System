@@ -47,7 +47,7 @@ const Signup = () => {
     try {
       setLoading(true);
       const res = await API.post(
-  "/auth/signup",
+  "/api/auth/signup",
   {
     fullName,
     email,
@@ -77,7 +77,7 @@ const Signup = () => {
       
       // Backend ke google endpoint par credential token bhej rahe hain
      const res = await API.post(
-  "/auth/google-login",
+  "/api/auth/google-login",
   {
     credential: credentialResponse.credential,
   }

@@ -25,7 +25,7 @@ if (loading) return;// Loading ke time dubara click prevent karega
       setResult("");
       setBreed("")
       console.log("Sending breed:", cleanBreed)
-      const res = await API.post("/info/info", { breed:cleanBreed });
+      const res = await API.post("/api/info/info", { breed:cleanBreed });
       setResult(res.data.data);
       setCached(res.data.cached || false);
 

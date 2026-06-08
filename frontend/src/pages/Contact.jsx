@@ -30,7 +30,7 @@ const Contact = () => {
     try {
       setLoading(true);
 
-      const res = await API.post("/contact", formData);
+      const res = await API.post("/api/contact", formData);
       toast.success(res.data.message || "Message sent successfully");
 
       setFormData({
@@ -38,10 +38,11 @@ const Contact = () => {
         email: "",
         message: "",
       });
-    toast.error(
-  error.response?.data?.error ||
-  "Failed to send message"
-);
+    }catch (error) { 
+      console.error(error);
+      toast.error(
+        error.response?.data?.error || "Failed to send message"
+      );
     } finally {
       setLoading(false);
     }
