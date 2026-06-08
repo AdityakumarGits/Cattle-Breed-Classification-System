@@ -1,8 +1,8 @@
 import User from "../model/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import resend from "../config/mail.js"; // 🚀 CENTRAL WORKER: Hamara Axios-Brevo wrapper yahin se email handle karega
-import { OAuth2Client } from "google-auth-library"; // 🚀 FIX: Missing Google OAuth import waapas joda
+import resend from "../config/mail.js"; // Hamara Axios-Brevo wrapper
+import { OAuth2Client } from "google-auth-library"; 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -38,7 +38,7 @@ export const signup = async (req, res) => {
       authProvider: "local" 
     });
 
-    // 🚀 CLEAN HIT: Ab yeh bina kisi SMTP timeout ke direct hamare Brevo API routing par hit karega
+    // Brevo API call through config wrapper
     await resend.emails.send({
       to: email,
       subject: "Verify Your Email - Cattle Classifier",
@@ -237,7 +237,6 @@ export const forgotPassword = async (req, res) => {
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
     await user.save();
 
-    // 🚀 Central Axios API Call
     await resend.emails.send({
       to: email,
       subject: "Reset Password OTP - Cattle Classifier",
@@ -251,4 +250,71 @@ export const forgotPassword = async (req, res) => {
       `,
     });
 
-    return res.json
+    return res.json({ success: true, message: "Password reset OTP sent" });
+  } catch (error) {
+    console.log("Forgot Password Error:", error);
+    return res.status(500).json({ error: "Failed to send OTP" });
+  }
+};
+
+// =============================================================================
+// 6. RESET PASSWORD (SAVE NEW PASSWORD)
+// =============================================================================
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    if (!user.otpExpiry || user.otpExpiry.getTime() < Date.now()) {
+      return res.status(400).json({ error: "OTP expired" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    user.otp = null; 
+    user.otpExpiry = null;
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "Password reset successful. You can log in now.",
+    });
+
+  } catch (error) {
+    console.log("Reset Password System Error:", error);
+    return res.status(500).json({ error: "Password reset failed" });
+  }
+};
+
+// =============================================================================
+// 7. USER LOGOUT (CLEAR SESSIONS)
+// =============================================================================
+export const logout = (req, res) => {
+  try {
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: isProduction, 
+      sameSite: isProduction ? "none" : "lax",
+      path: "/",
+    });
+
+    res.json({
+      success: true,
+      message: "Logout successful",
+    });
+  } catch (error) {
+    console.log("Logout System Error:", error);
+    res.status(500).json({ error: "Logout failed" });
+  }
+};
