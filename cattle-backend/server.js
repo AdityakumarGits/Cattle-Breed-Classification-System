@@ -12,49 +12,43 @@ dotenv.config();
 
 const app = express();
 
-// Database connection
 connectDB();
 
 // 🌐 MULTI-ORIGIN CORS CONFIGURATION (100% PRODUCTION READY)
 const allowedOrigins = [
-  "http://localhost:5173", // Standard Vite Port
-  "http://localhost:5174", // Backup Vite Port
-  process.env.FRONTEND_URL  // 🚀 Vercel/Render Frontend URL jo aap .env variable mein daloge
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://cattle-breed-classification-system.vercel.app" // Aapka Vercel Link
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like Postman or mobile apps)
     if (!origin) return callback(null, true);
-    
-    // 🚀 FIX: Ab yeh strictly allowedOrigins array ko check karega. 
-    // Credentials true hone par whitelist exact match hona compulsory hai.
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      console.log("⚠️ Blocked by CORS for Origin:", origin); // Logs mein dikhega agar koi galat origin hit karega
+      console.log("⚠️ Blocked by CORS for Origin:", origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true // Cookies (JWT token) handle karne ke liye zaroori hai
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // 🚀 FIX: Preflight request bypass karne ke liye explicit methods
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"] // 🚀 FIX: Headers explicit declare kiye
 }));
 
-// Middleware
 app.use(express.json());
 app.use(cookieParser());
 
 // Routes 
-app.use("/api/predict", predictRoutes);  // prediction routes
-app.use("/api/auth", userRoutes);        // signUp login routes
-app.use("/api/info", breedRoutes);       // breed info Routes
-app.use("/api/contact", contactRoutes);  // contact routes
+app.use("/api/predict", predictRoutes);  
+app.use("/api/auth", userRoutes);        
+app.use("/api/info", breedRoutes);       
+app.use("/api/contact", contactRoutes);  
 
-// Healthy API
 app.get("/", (req, res) => {
   res.send("Api IS Healthy");
 });
 
-// Dynamic Port for Cloud Platforms
 const PORT = process.env.PORT || 3000; 
 
 app.listen(PORT, () => {
