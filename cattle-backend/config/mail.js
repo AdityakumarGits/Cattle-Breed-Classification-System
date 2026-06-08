@@ -1,37 +1,42 @@
 import dotenv from "dotenv";
-// 🚀 FIX: Ab classes ko direct destructured format mein import karenge, sibSdk ki zaroorat nahi hai
-import { TransactionalEmailsApi, SendSmtpEmail } from "@getbrevo/brevo";
+import axios from "axios"; // 🚀 FIX: SDK hata kar direct standard Axios use kiya
 
 dotenv.config();
 
-// 🚀 Naye constructor ka direct object instantiate kiya
-const apiInstance = new TransactionalEmailsApi();
-
-// Render variables se uthayi hui API key ko as a string direct set kiya
-apiInstance.setApiKey(0, process.env.BREVO_API_KEY); // 0 means API KEY indexing standard format
-
-// Custom resend wrapper code taaki aapke signup/contact files ko touch na karna pade
+// Custom resend wrapper taaki aapke signup/contact controllers ka code bilkul na badalna pade
 const resendWannabe = {
   emails: {
     send: async ({ from, to, subject, html }) => {
-      const sendSmtpEmail = new SendSmtpEmail();
+      try {
+        // 🚀 Direct Brevo Transactional Email HTTP API Endpoint call
+        const response = await axios.post(
+          "https://api.brevo.com/v3/smtp/email",
+          {
+            sender: {
+              name: "Cattle Classifier",
+              email: process.env.EMAIL_USER || "cattlebreedhelp@gmail.com", // Aapka Gmail
+            },
+            to: [{ email: to }], // Jise OTP ya mail bhejna hai
+            subject: subject,
+            htmlContent: html, // Aapka OTP ya Message ka HTML body
+          },
+          {
+            headers: {
+              "accept": "application/json",
+              "api-key": process.env.BREVO_API_KEY, // Render par set ki hui API Key
+              "content-type": "application/json",
+            },
+          }
+        );
 
-      sendSmtpEmail.subject = subject;
-      sendSmtpEmail.htmlContent = html;
-      
-      // Dynamic Sender configuration (Bina custom domain ke chalega)
-      sendSmtpEmail.sender = { 
-        name: "Cattle Classifier", 
-        email: process.env.EMAIL_USER || "cattlebreedhelp@gmail.com" 
-      };
-      
-      // Recipient mapping array
-      sendSmtpEmail.to = [{ email: to }];
-
-      // Pure HTTPS API Call (Render isko block nahi kar payega!)
-      return await apiInstance.sendTransacEmail(sendSmtpEmail);
-    }
-  }
+        console.log("🚀 Brevo API Success:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("❌ Brevo API Error:", error.response ? error.response.data : error.message);
+        throw error;
+      }
+    },
+  },
 };
 
 export default resendWannabe;
