@@ -24,15 +24,23 @@ const Navbar = () => {
   }
 
   const handleLogout = async () => {
-    try {
-      await API.post("/auth/logout");
-      localStorage.removeItem("user");
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-    }
+  try {
+    // Backend session cookie delete karne ke liye secure hit
+    await API.post("/api/auth/logout");
+  } catch (error) {
+    console.error("Backend logout error, clearing local session anyway:", error);
+  } finally {
+    // 🚀 Token aur User data local storage se 100% clean karo
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     
-  };
+    // User ko landing page par redirect karo
+    navigate("/");
+    
+    // Page reload taaki memory se state flush ho jaye aur routes secure ho sakein
+    window.location.reload();
+  }
+};
 
   return (
     <div className="fixed top-0 left-0 z-50 w-full bg-white shadow-sm">

@@ -1,38 +1,35 @@
 import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+import * as sibSdk from "@getbrevo/brevo"; // 🚀 Brevo SDK import kiya
 
 dotenv.config();
 
-// 🔒 Forced Static IPv4 Address for Gmail SMTP
-const transporter = nodemailer.createTransport({
-  // ❌ service: "gmail" ko hata diya kyunki woh internal domain settings override kar deta hai
-  host: "74.125.130.108", // 🚀 CRITICAL FIX: Yeh direct smtp.gmail.com ka original IPv4 Cluster address hai!
-  port: 465,            
-  secure: true,         
-  connectionTimeout: 15000, 
-  greetingTimeout: 15000,
-  socketTimeout: 15000,
-  auth: {
-    user: process.env.EMAIL_USER, // cattlebreedhelp@gmail.com
-    pass: process.env.EMAIL_PASS, // 16-digit Google App Password
-  },
-  tls: {
-    rejectUnauthorized: false,
-    minVersion: "TLSv1.2",
-    servername: "smtp.gmail.com" // 🚀 ZAROORI: Google certificates validity validation ke liye domain specify karna compulsory hai
-  }
-});
+// Brevo API Client Initialize kiya
+const defaultClient = sibSdk.ApiClient.instance;
+const apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = process.env.BREVO_API_KEY; // Render se API key uthayega
 
-// Custom helper wrapper backend routing support ke liye
+const apiInstance = new sibSdk.TransactionalEmailsApi();
+
+// Custom wrapper taaki purana controller system break na ho
 const resendWannabe = {
   emails: {
     send: async ({ from, to, subject, html }) => {
-      return await transporter.sendMail({
-        from: from || `"Cattle Classifier" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html,
-      });
+      const sendSmtpEmail = new sibSdk.SendSmtpEmail();
+
+      sendSmtpEmail.subject = subject;
+      sendSmtpEmail.htmlContent = html;
+      
+      // 🚀 SENDER CONFIG: Bina domain ke aap apna real gmail use kar sakte ho!
+      sendSmtpEmail.sender = { 
+        name: "Cattle Classifier", 
+        email: process.env.EMAIL_USER || "cattlebreedhelp@gmail.com" 
+      };
+      
+      // RECEIVER CONFIG
+      sendSmtpEmail.to = [{ email: to }];
+
+      // Brevo ki Transactional Email API hit karein (HTTPS API Call - Render block nahi karega)
+      return await apiInstance.sendTransacEmail(sendSmtpEmail);
     }
   }
 };
