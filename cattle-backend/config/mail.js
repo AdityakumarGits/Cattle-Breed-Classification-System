@@ -1,16 +1,15 @@
 import dotenv from "dotenv";
-import * as sibSdk from "@getbrevo/brevo"; // 🚀 Brevo SDK import kiya
+import * as sibSdk from "@getbrevo/brevo";
 
 dotenv.config();
 
-// Brevo API Client Initialize kiya
-const defaultClient = sibSdk.ApiClient.instance;
-const apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = process.env.BREVO_API_KEY; // Render se API key uthayega
-
+// 🚀 FIX: Naye Brevo version mein direct client class instantiate hoti hai, bina instance properties ke
 const apiInstance = new sibSdk.TransactionalEmailsApi();
 
-// Custom wrapper taaki purana controller system break na ho
+// Render par set ki hui API KEY ko authorize kar rahe hain
+apiInstance.setApiKey(sibSdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+
+// Custom adapter wrapper taaki baki controllers ka code bilkul na badalna pade
 const resendWannabe = {
   emails: {
     send: async ({ from, to, subject, html }) => {
@@ -19,16 +18,16 @@ const resendWannabe = {
       sendSmtpEmail.subject = subject;
       sendSmtpEmail.htmlContent = html;
       
-      // 🚀 SENDER CONFIG: Bina domain ke aap apna real gmail use kar sakte ho!
+      // Sender dynamic set kiya (bina domain ke aapka gmail chalega)
       sendSmtpEmail.sender = { 
         name: "Cattle Classifier", 
         email: process.env.EMAIL_USER || "cattlebreedhelp@gmail.com" 
       };
       
-      // RECEIVER CONFIG
+      // Receiver set kiya
       sendSmtpEmail.to = [{ email: to }];
 
-      // Brevo ki Transactional Email API hit karein (HTTPS API Call - Render block nahi karega)
+      // Brevo API call execute kari (HTTPS Call - Render par block nahi hoga)
       return await apiInstance.sendTransacEmail(sendSmtpEmail);
     }
   }
