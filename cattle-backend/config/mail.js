@@ -14,7 +14,7 @@ const resendWannabe = {
           {
             sender: {
               name: "Cattle Classifier",
-              email: process.env.EMAIL_USER || "cattlebreedhelp@gmail.com", // Aapka Gmail
+              email: process.env.EMAIL_USER || "alpha30.8080@gmail.com", // Aapka Gmail
             },
             to: [{ email: to }], // Jise OTP ya mail bhejna hai
             subject: subject,
