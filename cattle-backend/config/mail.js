@@ -3,33 +3,27 @@ import nodemailer from "nodemailer";
 
 dotenv.config();
 
-// 🔒 Centralized Secure Nodemailer Configuration (Forced IPv4)
+// 🔒 Forced Static IPv4 Address for Gmail SMTP
 const transporter = nodemailer.createTransport({
-  service: "gmail",
-  // 🚀 FIX: smtp.gmail.com ki jagah direct IP family 4 configure karne ke liye host settings core options lagaye hain
-  host: "smtp.gmail.com", 
+  // ❌ service: "gmail" ko hata diya kyunki woh internal domain settings override kar deta hai
+  host: "74.125.130.108", // 🚀 CRITICAL FIX: Yeh direct smtp.gmail.com ka original IPv4 Cluster address hai!
   port: 465,            
   secure: true,         
-  // 🚀 CRITICAL FIX: Yeh properties Nodemailer ko force karegi ki woh IPv6 network tunnel block ko bypass kare
-  connectionTimeout: 10000, // 10 seconds timeout
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-  dns: {
-    // Standard DNS fallback taaki IPv4 automatically select ho
-    family: 4 
-  },
+  connectionTimeout: 15000, 
+  greetingTimeout: 15000,
+  socketTimeout: 15000,
   auth: {
     user: process.env.EMAIL_USER, // cattlebreedhelp@gmail.com
     pass: process.env.EMAIL_PASS, // 16-digit Google App Password
   },
   tls: {
     rejectUnauthorized: false,
-    // Strictly specify encryption standard for IPv4 compatibility
-    minVersion: "TLSv1.2" 
+    minVersion: "TLSv1.2",
+    servername: "smtp.gmail.com" // 🚀 ZAROORI: Google certificates validity validation ke liye domain specify karna compulsory hai
   }
 });
 
-// Custom helper object to handle existing controller routing smoothly
+// Custom helper wrapper backend routing support ke liye
 const resendWannabe = {
   emails: {
     send: async ({ from, to, subject, html }) => {
